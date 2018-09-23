@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,10 +40,10 @@ public class InventoryLoader {
 			
 			try {
 				String TEST = fileName.getValue();
-	//			
-	//			InputStream path = InventoryLoader.class.getResourceAsStream();
 				
-				File file = new File("C:\\Users\\sergio.r.pichelbauer\\eclipse-workspace\\SMarket\\src\\Inventory"+TEST);
+				InputStream path = InventoryLoader.class.getResourceAsStream(TEST);
+				
+				File file = new File("C:\\Users\\sergio.r.pichelbauer\\eclipse-workspace\\SMarket\\SMarket\\src\\Inventory"+TEST);
 				BufferedReader in = new BufferedReader(new FileReader(file));
 			    String str = in.readLine();
 			    while ((str = in.readLine()) != null) {

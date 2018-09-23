@@ -178,7 +178,8 @@ class ServerActionHelper {
     	sb.append("<th>Product</th>");
     	sb.append("<th>Departments</th>");
     	sb.append("<th>Categories</th>");
-    	sb.append("<th>Add to cart</th>");
+//    	if () //
+    		sb.append("<th>Add to cart</th>");
     	sb.append("<th>Remove from cart</th>");
     	sb.append("</tr>");
     	inventory.forEach((k,v)->{ 
@@ -188,11 +189,13 @@ class ServerActionHelper {
 	    	v.getDepartments().forEach(dep->{
 	    		sb.append(dep + " - ");
 	    	});
+	    	sb.deleteCharAt(sb.lastIndexOf("-"));
 	    	sb.append("</td>");	
 	    	sb.append("<td align=\"center\">");
 	    	v.getCategories().forEach( dep-> {
 	    		sb.append(dep + " - ");
 	    	});	
+	    	sb.deleteCharAt(sb.lastIndexOf("-"));
 	    	sb.append("</td>");
 	    	
 	    	if (!(cart == null)) {
