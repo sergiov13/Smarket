@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" type="text/css" href="css/style.css">
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<style type="text/css">
+form {
+    margin: 0 auto;
+    width: 400px;
+    padding: 1em;
+    border: 1px solid #CCC;
+    border-radius: 1em;
+}
+</style>
+
+<body>
+<h1>Search</h1>
+<form action="/list" method="post">
+	<table style="width:100%">
+		<tr>
+			<th>
+		   	 <div>
+		        <label for="name">Name:</label>
+		        <input type="text" id="name" name="product_name"/>
+	       	 </div>
+			</th>
+   		<th>
+		    <div>
+		    	<label for="category">Category:</label>
+				%category%
+		    </div>
+	    </th>
+	    <th>
+	       <div>
+	       		<label for="department">Department:</label>
+				%department%
+	    	</div>
+	    </th>
+	  </tr>
+    </table>
+	    <div class="button">
+	        <button type="submit">Buscar</button>
+	    </div>
+	
+</form>
+<br>
+<form action/list method="post">
+<input type=button name="list" onClick="location.href='completeList'" value='list'>
+</form>
+<form action/cartList method"get">
+<input type=button name="cartList" onClick="location.href='cartList'" value='cartList'>
+</form>
+</body>
+</html>
