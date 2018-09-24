@@ -32,7 +32,7 @@ public class FilterAction implements IServerAction {
 		String query = exchange.getRequestURI().getPath();
 		
 		//Cart Load
-		ArrayList<String> cartRaw =  readCart();
+		List<String> cartRaw =  readCart(exchange);
 	    
 		Cart cart = new Cart();
 	    cartRaw.forEach(prod -> {

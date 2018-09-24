@@ -4,6 +4,7 @@ import com.sun.net.httpserver.Headers;
 
 import model.Cart;
 import model.Product;
+import model.loader.InventoryLoader;
 import server.controller.IServerExchange;
 import java.io.*;
 import java.util.*;
@@ -175,12 +176,12 @@ class ServerActionHelper {
     	sb.append("<form action=\"/manageCart\" method=\"POST\">");
     	sb.append("<table class=\"table table-hover\">"); // add name
     	sb.append("<tr>");
-    	sb.append("<th align=\"center\">Product</th>");
-    	sb.append("<th align=\"center\">Departments</th>");
-    	sb.append("<th align=\"center\">Categories</th>");
+    	sb.append("<th style=\"text-align:center;\">Product</th>");
+    	sb.append("<th style=\"text-align:center;\" align=\"center\">Departments</th>");
+    	sb.append("<th style=\"text-align:center;\" align=\"center\">Categories</th>");
     	if (!name.equals("%CartList%")) //
-    		sb.append("<th align=\"center\">Add to cart</th>");
-    	sb.append("<th align=\"center\">Remove from cart</th>");
+    		sb.append("<th style=\"text-align:center;\" align=\"center\">Add to cart</th>");
+    	sb.append("<th style=\"text-align:center;\" align=\"center\">Remove from cart</th>");
     	sb.append("</tr>");
     	inventory.forEach((k,v)->{ 
 	    	sb.append("<tr>");
@@ -232,59 +233,61 @@ class ServerActionHelper {
     	file = file2;
     }
     
-    static void resetCart() throws IOException {
-    	final File folder = new File(tDir+"\\");
-    	final File[] files = folder.listFiles( new FilenameFilter() {
-			    public boolean accept( final File dir,
-			                           final String name ) {
-			        return name.matches( "cartPersistence.*\\.tmp" );
-			    }
-			} );
-			for ( final File file : files ) {
-			    if ( !file.delete() ) 
-			        System.err.println( "Can't remove " + file.getAbsolutePath() );
+    static void resetCart(IServerExchange exchange) throws IOException {
+		List<String> cookie = exchange.getRequestHeaders().get("Cookie");
+		exchange.getResponseHeaders()
+           .put("Set-Cookie", new ArrayList<String>() {{
+               add("CART=" + "");
+           }});
+    }
+    
+	static List<String> getCookieCart(IServerExchange exchange) { 
+		List<String> cookie = exchange.getRequestHeaders().get("Cookie");
+		List<String> cookieCart = new ArrayList<>();
+		String[] cookies = cookie.get(0).split(";");
+		String[] prodCart = null;
+		Cart cart = new Cart();
+		for (String text : cookies)
+		{
+			if(text.contains("CART")) {
+				String[] aux = text.split("=");
+				prodCart = aux[1].split("-");
+				break;
 			}
-			setFile(null);
+		}
+		if (prodCart != null)
+		for (String prod : prodCart ) {
+			cookieCart.add(prod);
+		}
+        return cookieCart;
+	} 
+ 
+    static void add2Cart(String prod, IServerExchange exchange) throws IOException {
+    		List<String> cookie = getCookieCart(exchange);
+    		cookie.add(prod);
+    		StringBuilder sb = new StringBuilder();
+    		cookie.forEach( k -> {
+    			sb.append(k+"-");
+    		});
+    		sb.deleteCharAt(sb.lastIndexOf("-"));
+    		exchange.getResponseHeaders()
+	        .put("Set-Cookie", new ArrayList<String>() {{
+	            add("CART=" + sb.toString());
+	        }});
     }
     
-    static void add2Cart(String prod) throws IOException {
-    	if (file == null) {	
-    		resetCart();
-    		File tmpFile = File.createTempFile("cartPersistence", ".tmp");
-    		FileWriter writer = new FileWriter(tmpFile);
-    		writer.write(prod.replace("+"," ")+"\n");
-    		writer.close();
-    		setFile(tmpFile);
-    	} else {
-    		FileWriter writer = new FileWriter(file, true);
-    		writer.append(prod.replace("+", " ")+"\n");
-    		writer.close();
-    	}
-        System.out.println("Temp file : " +tDir); 
-
+    public static List<String> readCart(IServerExchange exchange) throws IOException {
+    	return getCookieCart(exchange);
     }
     
-    public static ArrayList<String> readCart() throws IOException {
-    	ArrayList<String> aux = new ArrayList<>();
-    	if (!(file == null)) {
-	    	BufferedReader reader = new BufferedReader(new FileReader(file));
-	   	 	String line;
-	   	 	while ((line = reader.readLine()) != null) {
-	   	 			aux.add(line);
-	   	 	}
-	   	 	reader.close();
-    	}
-    	return aux;
-    }
-    
-    static void removeFromCart(String name) throws IOException {
-    	ArrayList<String> aux = readCart();
-    	aux.remove(name.replace("+", " "));
-    	resetCart();
+    static void removeFromCart(IServerExchange exchange,String name) throws IOException {
+    	List<String> aux = getCookieCart(exchange);
+    	List<String> newCart = new ArrayList<>();
+    	aux.remove(name);
+    	resetCart(exchange);
     	aux.forEach(k -> {
     		try {
-    			
-				add2Cart(k);
+				add2Cart(k, exchange);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

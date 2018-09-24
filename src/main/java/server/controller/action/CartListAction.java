@@ -3,6 +3,13 @@ package server.controller.action;
 import server.controller.IServerExchange;
 
 import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.net.CookieStore;
+import java.net.HttpCookie;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,9 +30,9 @@ public class CartListAction implements IServerAction {
 
     @Override
     public void execute(IServerExchange exchange) throws IOException {
-
+ 
     	Map<String, String> params = getWwwFormUrlencodedBody(exchange);
-       
+    	
 		switch (getAction(params)) {
             case "cartList":
                 cartList(exchange, params);
@@ -48,16 +55,13 @@ public class CartListAction implements IServerAction {
 		
 		InventoryLoader inventory = new InventoryLoader();
 		//Cart Load
-		ArrayList<String> cartRaw =  readCart();
+		List<String> cartRaw =  readCart(exchange);
 	    Cart cart = new Cart();
 	    cartRaw.forEach(prod -> {
 	    	cart.addProduct(inventory.getInventory().get(prod));
 	    });
-	    //Validation
     	Map<String,String> token = createTokenTable(createCartListInventory(inventory.getInventory(), cart), cart, "%CartList%");
-    	
     	createPageAndSend(exchange,"/cartList.html",token, 200);
-
     	exchange.close();
     
 	}
@@ -67,7 +71,7 @@ public class CartListAction implements IServerAction {
 	private void removeProduct(IServerExchange exchange, Map<String,String> params) throws IOException {
 		params.forEach((k,v) -> {
 			try {
-				removeFromCart(v);
+				removeFromCart(exchange, v);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -90,10 +94,11 @@ public class CartListAction implements IServerAction {
 	private void addProduct(IServerExchange exchange, Map<String, String> params) throws IOException {
         params.forEach((k,v) -> {
         	try {
-				add2Cart(v);
+				add2Cart(v, exchange);
 			} catch (IOException e) {}
         });
     	cartList(exchange, params);
+    	
     }
     
 	private Map<String,Product> createCartListInventory(Map<String, Product> inventory, Cart cart) {
@@ -114,6 +119,8 @@ public class CartListAction implements IServerAction {
         	return matcher.group(1);
         
         return "";
+        
+     
 	}
 }
     
