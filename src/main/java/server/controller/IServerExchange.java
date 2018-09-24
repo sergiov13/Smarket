@@ -7,8 +7,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-import model.Cart;
-
 /* IServerExchange is the interface for the Adapter pattern implemented in ServerExchange.
  *
  */

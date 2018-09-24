@@ -6,7 +6,7 @@ import java.util.Map;
 import com.sun.net.httpserver.HttpHandler;
 import server.controller.ServerHandler;
 import server.controller.action.IServerAction;
-import server.controller.action.CartList;
+import server.controller.action.CartListAction;
 import server.controller.action.FilterAction;
 import server.controller.action.HomeAction;
 import server.controller.action.ServerActionFactory;
@@ -16,12 +16,12 @@ import server.controller.action.ServerActionFactory;
  */
 public class RunContext extends Context {
 
-    // Router configuration for our server
-    // We map a URI path and method with a concrete action controller
+    // Router configuration for the server
+    // Maps a URI path and method with a concrete action controller
     protected HashMap<String, IServerAction> router = new HashMap<String, IServerAction>() {{
-    	 put("POST/index.html", new HomeAction());
-         put("(POST|GET|DELETE)/list.html$", new FilterAction());
-         put("POST/cartList.html$", new CartList());
+    	 put("(POST|GET)index.html", new HomeAction());
+         put("(POST|GET)/list.html$", new FilterAction());
+         put("POST/cartList.html$", new CartListAction());
     }};
 
 

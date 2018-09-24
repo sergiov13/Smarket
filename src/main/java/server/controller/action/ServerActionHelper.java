@@ -4,22 +4,15 @@ import com.sun.net.httpserver.Headers;
 
 import model.Cart;
 import model.Product;
-import model.loader.InventoryLoader;
 import server.controller.IServerExchange;
-
-import static server.controller.action.ServerActionHelper.getQueryParams;
-import static server.controller.action.ServerActionHelper.workToken;
-
 import java.io.*;
 import java.util.*;
-import java.util.logging.FileHandler;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import server.controller.action.ServerActionHelper;
 
-/* ServerActionHelper
- *
+/* ServerActionHelper contains the main logic for generating, parsing and filling with data tables and drop-downs
+ * It also handles the request from GET and POST method as well as the responses
+ * It manages the cart persistence, reading, writing, reseting and storing the physical adddress from the cartPersistance#.tmp file used to persist the cart info	
  */
 class ServerActionHelper {
 
@@ -73,13 +66,41 @@ class ServerActionHelper {
         return null != contentType && contentType.contains("application/x-www-form-urlencoded");
 
     }
-
+     
+    //For POST method
     static Map<String, String> getWwwFormUrlencodedBody(IServerExchange exchange) throws IOException {
         HashMap<String, String> map = new HashMap<>();
         String body = getStringFromInputStream(exchange.getRequestBody());
-
+        if (null == body)
+            return null;
+        int i= 0;
         for (String parameter : body.split("&")) {
             String[] keyValue = parameter.split("=");
+
+            if (keyValue.length != 2)
+                return null;
+            if(keyValue[0].contains("-")){
+            	String [] aux = keyValue[0].split("-");
+            	map.put(aux[0]+i, keyValue[1]);
+            } else {
+            	map.put(keyValue[0], keyValue[1]);
+            }
+            i++;
+        }
+        return map;
+    }
+    
+    //For GET method
+    static Map<String, String> getQueryParams(IServerExchange exchange) {
+        HashMap<String, String> map = new HashMap<>();
+
+        String query = exchange.getRequestURI().getQuery();
+        if (null == query)
+            return null;
+        
+        for (String parameter : query.split("&")) {
+            String[] keyValue = parameter.split("=");
+            
             if (keyValue.length != 1)
             	map.put(keyValue[0], keyValue[1]);
             else if (keyValue[0].isEmpty())
@@ -87,6 +108,9 @@ class ServerActionHelper {
             else
             	map.put(keyValue[0],"empty");
         }
+        
+        
+
         return map;
     }
     
@@ -113,30 +137,6 @@ class ServerActionHelper {
         os.write(message.getBytes("UTF-8"));
     }
 
-    static Map<String, String> getQueryParams(IServerExchange exchange) {
-        HashMap<String, String> map = new HashMap<>();
-
-        String query = exchange.getRequestURI().getQuery();
-        
-        if (null == query)
-            return null;
-        int i= 0;
-        for (String parameter : query.split("&")) {
-            String[] keyValue = parameter.split("=");
-
-            if (keyValue.length != 2)
-                return null;
-            if(keyValue[0].contains("-")){
-            	String [] aux = keyValue[0].split("-");
-            	map.put(aux[0]+i, keyValue[1]);
-            } else {
-            	map.put(keyValue[0], keyValue[1]);
-            }
-            i++;
-        }
-
-        return map;
-    }
 
     private static int stream(InputStream is, OutputStream os) throws IOException {
         final byte[] buffer = new byte[4096];
@@ -172,15 +172,15 @@ class ServerActionHelper {
     
     static Map<String,String> createTokenTable(Map<String,Product> inventory,Cart cart, String name) {
     	StringBuilder sb = new StringBuilder();
-    	sb.append("<form action=\"/manageCart\" method=\"GET\">");
-    	sb.append("<table style=\"width:100%\" >"); // add name
+    	sb.append("<form action=\"/manageCart\" method=\"POST\">");
+    	sb.append("<table class=\"table table-hover\">"); // add name
     	sb.append("<tr>");
-    	sb.append("<th>Product</th>");
-    	sb.append("<th>Departments</th>");
-    	sb.append("<th>Categories</th>");
-//    	if () //
-    		sb.append("<th>Add to cart</th>");
-    	sb.append("<th>Remove from cart</th>");
+    	sb.append("<th align=\"center\">Product</th>");
+    	sb.append("<th align=\"center\">Departments</th>");
+    	sb.append("<th align=\"center\">Categories</th>");
+    	if (!name.equals("%CartList%")) //
+    		sb.append("<th align=\"center\">Add to cart</th>");
+    	sb.append("<th align=\"center\">Remove from cart</th>");
     	sb.append("</tr>");
     	inventory.forEach((k,v)->{ 
 	    	sb.append("<tr>");
@@ -199,22 +199,23 @@ class ServerActionHelper {
 	    	sb.append("</td>");
 	    	
 	    	if (!(cart == null)) {
-		    	if(!cart.getCart().contains(v) && !name.equals("%cartList%")) {
-		        	sb.append("<td align=\"center\">"+"<input id=\"addProduct\" type=\"checkbox\" name=\"addProduct-"+v.getName()+"\" value= " + v.getName() +" />"+"</td>");
+		    	if(!cart.getCart().contains(v) && !name.equals("%CartList%")) {
+		        	sb.append("<td align=\"center\">"+"<input id=\"addProduct\" type=\"checkbox\" name=\"addProduct-"+v.getName()+"\" value=\"" + v.getName() +"\" />"+"</td>");
 		    	} else	{
-		    		sb.append("<td></td>");
-		        	sb.append("<td align=\"center\">"+"<input id=\"removeProduct\" type=\"checkbox\" name=\"removeProduct-"+v.getName()+"\" value="+v.getName()+" />"+"</td>");
+		    		if (!name.equals("%CartList%"))
+		    			sb.append("<td></td>");
+		        	sb.append("<td align=\"center\">"+"<input id=\"removeProduct\" type=\"checkbox\" name=\"removeProduct-"+v.getName()+"\" value=\""+v.getName()+"\" />"+"</td>");
 		    	}
 	    		sb.append("</tr>");
 	    	} else {
-		        	sb.append("<td align=\"center\">"+"<input id=\"addProduct\" type=\"checkbox\" name=\"addProduct-"+v.getName()+"\" value= " + v.getName() +" />"+"</td>");
+		        	sb.append("<td align=\"center\">"+"<input id=\"addProduct\" type=\"checkbox\" name=\"addProduct-"+v.getName()+"\" value=\"" + v.getName() +"\" />"+"</td>");
 		    		sb.append("</tr>");
 	    	}
     	});
     	sb.append("</table>");
-    	
-    	sb.append("<div class=\"button\">");
-    	sb.append("<button type=\"submit\">Buscar</button>");
+    	sb.append("<br>");
+    	sb.append("<div style=\"text-align:center;\" class=\"button\">");
+    	sb.append("<button  align=\"center\" class=\"btn btn-primary btn-lg active\" type=\"submit\">Process</button>");
     	sb.append("</div>");
     	sb.append("</form>");
     	Map<String,String> tokenReady = new HashMap<>();
@@ -240,10 +241,10 @@ class ServerActionHelper {
 			    }
 			} );
 			for ( final File file : files ) {
-			    if ( !file.delete() ) {
+			    if ( !file.delete() ) 
 			        System.err.println( "Can't remove " + file.getAbsolutePath() );
-			    }
 			}
+			setFile(null);
     }
     
     static void add2Cart(String prod) throws IOException {
@@ -251,12 +252,12 @@ class ServerActionHelper {
     		resetCart();
     		File tmpFile = File.createTempFile("cartPersistence", ".tmp");
     		FileWriter writer = new FileWriter(tmpFile);
-    		writer.write(prod+"\n");
+    		writer.write(prod.replace("+"," ")+"\n");
     		writer.close();
     		setFile(tmpFile);
     	} else {
     		FileWriter writer = new FileWriter(file, true);
-    		writer.append(prod+"\n");
+    		writer.append(prod.replace("+", " ")+"\n");
     		writer.close();
     	}
         System.out.println("Temp file : " +tDir); 
@@ -278,7 +279,7 @@ class ServerActionHelper {
     
     static void removeFromCart(String name) throws IOException {
     	ArrayList<String> aux = readCart();
-    	aux.remove(name);
+    	aux.remove(name.replace("+", " "));
     	resetCart();
     	aux.forEach(k -> {
     		try {

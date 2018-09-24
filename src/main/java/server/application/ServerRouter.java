@@ -18,21 +18,16 @@ public class ServerRouter implements IServerRouter {
     }
 
 
-    // Router logic to build the key to map for an action
+    // Router logic that is used to build the key to map an action
     private String setRouterKey(IServerExchange exchange) {
         return exchange.getRequestMethod() + exchange.getRequestURI().getPath();
     }
 
-
-	@Override
 	public Optional<IServerAction> get(IServerExchange exchange) {
-
         for (Map.Entry<String, IServerAction> e: router.entrySet()) {
             if (Pattern.matches(e.getKey(), setRouterKey(exchange)))
                 return Optional.of(e.getValue());
         }
-
         return Optional.empty();
     }
-	
 }

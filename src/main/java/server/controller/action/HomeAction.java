@@ -11,9 +11,10 @@ import model.loader.InventoryLoader;
 
 import static server.controller.action.ServerActionHelper.*;
 
-/*
+/* Home action is the controller action for the home page
  *
  */
+
 public class HomeAction implements IServerAction {
 
     @Override
@@ -31,9 +32,6 @@ public class HomeAction implements IServerAction {
        
         createPageAndSend(exchange, "/home.html", tokenReplaceReady,200);
 
-        //            if (null == query || query.isEmpty())
-//        else
-//            replaceTokenAndSend(exchange, uri.getPath(), "%referer%", "?"+query,200);
     }
 
 }

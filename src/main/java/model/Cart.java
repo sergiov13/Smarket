@@ -2,6 +2,10 @@ package model;
 
 import java.util.ArrayList;
 
+/*
+ * Cart is object model for a Cart which will contain Object Products
+ * 
+ */
 public class Cart {
 
 	private ArrayList<Product> cart;

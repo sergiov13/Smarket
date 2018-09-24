@@ -3,6 +3,10 @@ package model;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/*
+ * Product is the bjejct model for Products
+ * Product can have multiple categories and departments
+ */
 public class Product {
 	
 	private String name;

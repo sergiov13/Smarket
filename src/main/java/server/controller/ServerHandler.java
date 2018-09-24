@@ -22,7 +22,12 @@ public class ServerHandler implements HttpHandler {
         this.actionFactory = actionFactory;
     }
 
-    // Implementation of HttpHandler
+
+    /*
+     *Implementation of HttpHandler, this will handle the requests and trigger a mapped action.
+     *
+     * @see com.sun.net.httpserver.HttpHandler#handle(com.sun.net.httpserver.HttpExchange)
+     */
     public void handle(HttpExchange httpExchange) throws IOException {
         IServerExchange exchange = new ServerExchange(httpExchange);
         IServerAction action = actionFactory.getAction(exchange);

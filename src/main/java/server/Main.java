@@ -1,16 +1,15 @@
 package server;
 
 import java.io.IOException;
-import java.util.Map;
-
-import model.Product;
-import model.loader.InventoryLoader;
 import server.application.RunContext;
 
 public class Main {
 
 	public static void main(String[] args) {
+		
+		//Listening port
 		int port = 8001;
+		
 		try {
 	            new RunContext().start(port);
 	            System.out.println("************************************************");

@@ -1,6 +1,6 @@
 package server.application;
 
-import java.io.File;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -10,15 +10,13 @@ import server.application.ServerRouter;
 import server.controller.ServerHandler;
 import server.controller.action.IServerAction;
 import server.controller.action.FilterAction;
-import server.controller.action.CartList;
+import server.controller.action.CartListAction;
 import server.controller.action.HomeAction;
 import server.controller.action.ServerActionFactory;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
-import model.Cart;
-import model.Product;
-import model.loader.InventoryLoader;
+
 
 public abstract class Context {
 
@@ -27,9 +25,9 @@ public abstract class Context {
     private Map<String, IServerAction> routerConfiguration =
     	    new HashMap<String, IServerAction>()
     		{{
-                put("POST/index.html", new HomeAction());
-                put("(POST|GET|DELETE)/list.html$", new FilterAction());
-                put("(POST|DELETE)/cartList.html$", new CartList());
+    	    	 put("(POST|GET)home.html", new HomeAction());
+    	         put("(POST|GET)/list.html$", new FilterAction());
+    	         put("POST/cartList.html$", new CartListAction());
             }};
 
     // Interface to supply context that subclasses must implement.

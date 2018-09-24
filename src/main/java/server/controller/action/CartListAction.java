@@ -2,55 +2,39 @@ package server.controller.action;
 
 import server.controller.IServerExchange;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.net.CookieHandler;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import server.controller.action.*;
-import server.controller.ServerExchange;
-
 import model.Cart;
 import model.Product;
 import model.loader.InventoryLoader;
 
 import static server.controller.action.ServerActionHelper.*;
 
-/* UserApiAction is the REST API controller. An authenticated admin user can create,
- * modify anddelete users from the user store.
+/* CartListAction is the controller containing the logic for adding and removing from the cart 
+ * as well as filtering the products that have been added to the cart.
+ * 
  */
-public class CartList implements IServerAction {
-
+public class CartListAction implements IServerAction {
 
     @Override
     public void execute(IServerExchange exchange) throws IOException {
 
-    	Map<String, String> params;
-  
-    	if (exchange.getRequestMethod().equals("GET")) {
-    	   	params = getQueryParams(exchange);
-        } else {
-       		params = getQueryParams(exchange);
-        }
+    	Map<String, String> params = getWwwFormUrlencodedBody(exchange);
        
 		switch (getAction(params)) {
             case "cartList":
-                cartList(exchange);
+                cartList(exchange, params);
                 break;
             case "addProduct":
-                addProduct(exchange);
+                addProduct(exchange, params);
                 break;
             case "removeProduct":
-            	removeProduct(exchange);
+            	removeProduct(exchange, params);
             	break;
             default:
                 exchange.setStatus(405,-1);
@@ -60,8 +44,8 @@ public class CartList implements IServerAction {
 
 
 
-	private void cartList(IServerExchange exchange) throws IOException {
-		Map<String, String> params = getWwwFormUrlencodedBody(exchange);
+	private void cartList(IServerExchange exchange, Map <String,String> params) throws IOException {
+		
 		InventoryLoader inventory = new InventoryLoader();
 		//Cart Load
 		ArrayList<String> cartRaw =  readCart();
@@ -69,20 +53,18 @@ public class CartList implements IServerAction {
 	    cartRaw.forEach(prod -> {
 	    	cart.addProduct(inventory.getInventory().get(prod));
 	    });
-	    
-        if (null != params) { //Validation  	
-        	Map<String,String> token = createTokenTable(createCartListInventory(inventory.getInventory(), cart), cart, "%list%");
-        	
-        	createPageAndSend(exchange,"/list.html",token, 200);
+	    //Validation
+    	Map<String,String> token = createTokenTable(createCartListInventory(inventory.getInventory(), cart), cart, "%CartList%");
+    	
+    	createPageAndSend(exchange,"/cartList.html",token, 200);
 
-        	exchange.close();
-        }
+    	exchange.close();
+    
 	}
 
 
 
-	private void removeProduct(IServerExchange exchange) throws IOException {
-		Map<String, String> params = getQueryParams(exchange);
+	private void removeProduct(IServerExchange exchange, Map<String,String> params) throws IOException {
 		params.forEach((k,v) -> {
 			try {
 				removeFromCart(v);
@@ -90,7 +72,7 @@ public class CartList implements IServerAction {
 				e.printStackTrace();
 			}
 		});
-		cartList(exchange);
+		cartList(exchange, params);
 	}
 
 	private String getAction(Map<String,String> params) {
@@ -105,14 +87,13 @@ public class CartList implements IServerAction {
 		return act;
 	}
 
-	private void addProduct(IServerExchange exchange) throws IOException {
-        Map<String, String> params = getQueryParams(exchange);
+	private void addProduct(IServerExchange exchange, Map<String, String> params) throws IOException {
         params.forEach((k,v) -> {
         	try {
 				add2Cart(v);
 			} catch (IOException e) {}
         });
-    	cartList(exchange);
+    	cartList(exchange, params);
     }
     
 	private Map<String,Product> createCartListInventory(Map<String, Product> inventory, Cart cart) {
@@ -133,14 +114,6 @@ public class CartList implements IServerAction {
         	return matcher.group(1);
         
         return "";
-	}
-	
-	public Map<String,String> clean(Map<String,String> params){
-		List val = new ArrayList<String>(params.values());
-		params.forEach((k,v) -> {
-			
-		});
-		return params;
 	}
 }
     
