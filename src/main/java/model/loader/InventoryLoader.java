@@ -1,15 +1,18 @@
 package model.loader;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import model.Product;
 
-
+/*
+ * Loader for the inventory, getter and setters for each aspect can be found here
+ * 
+ */
 public class InventoryLoader {
 	
 	Map<String, Product> inventory = new HashMap<>();
@@ -38,12 +41,9 @@ public class InventoryLoader {
 		EnumSet.allOf(Inventory.class).forEach( fileName -> {
 			
 			try {
-				String TEST = fileName.getValue();
-	//			
-	//			InputStream path = InventoryLoader.class.getResourceAsStream();
-				
-				File file = new File("C:\\Users\\sergio.r.pichelbauer\\eclipse-workspace\\SMarket\\src\\Inventory"+TEST);
-				BufferedReader in = new BufferedReader(new FileReader(file));
+				String file = fileName.getValue();
+				InputStream path = InventoryLoader.class.getResourceAsStream("/Inventory"+file);
+				BufferedReader in = new BufferedReader(new InputStreamReader(path));
 			    String str = in.readLine();
 			    while ((str = in.readLine()) != null) {
 			        System.out.println(str);

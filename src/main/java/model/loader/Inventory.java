@@ -3,12 +3,16 @@ package model.loader;
 import java.util.ArrayList;
 import java.util.List;
 
+/* 
+ * Inventory repository implementing enum, for the loader to use 
+ *
+ */
 
 public enum Inventory {
-	CATEGORY("\\Category.config"),
-	DEPARTMENT("\\Department.config"),
-	PRODUCT("\\Product.config"),
-	INVENTORY("\\Inventory.config");
+	CATEGORY("/Category.config"),
+	DEPARTMENT("/Department.config"),
+	PRODUCT("/Product.config"),
+	INVENTORY("/Inventory.config");
 
     public static final List<Inventory> all = new ArrayList<Inventory>(){{
         add(CATEGORY);

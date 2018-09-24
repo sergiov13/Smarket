@@ -9,7 +9,7 @@ import server.controller.IServerExchange;
 
 
 /* ServerActionFactory implements Factory Method pattern.
- * It provides a creational method which return an specific action implementation
+ * It provides a creational method which returns an specific action implementation
  * for the needed job, depending on our router configuration.
  */
 public class ServerActionFactory {
@@ -30,7 +30,7 @@ public class ServerActionFactory {
          //Create actions
         this.homeAction = new HomeAction();
         this.filterAction = new FilterAction();
-        this.cartList = new CartList();
+        this.cartList = new CartListAction();
         this.notFoundAction = new NotFoundAction();
     }
 
@@ -46,13 +46,13 @@ public class ServerActionFactory {
             act = new FilterAction();
             break;
         case "/cartList":
-        	act = new CartList();
+        	act = new CartListAction();
         	break;
         case "/":
         	act = new HomeAction();
         	break;
         case "/manageCart":
-        	act = new CartList();
+        	act = new CartListAction();
         	break;
         case "/completeList":
         	act = new FilterAction();

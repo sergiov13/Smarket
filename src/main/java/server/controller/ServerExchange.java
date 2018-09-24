@@ -1,9 +1,6 @@
 package server.controller;
 
 import com.sun.net.httpserver.HttpExchange;
-
-import model.Cart;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,8 +15,6 @@ import java.util.Map;
 public class ServerExchange implements IServerExchange {
 
     private final HttpExchange exchange;
-    
-    private Cart cart;
     
     public ServerExchange(HttpExchange exchange) {
         this.exchange = exchange;
